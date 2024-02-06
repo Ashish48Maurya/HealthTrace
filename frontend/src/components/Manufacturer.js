@@ -11,14 +11,14 @@ export default function Manufacturer() {
   const [productID, setProductID] = useState("");
   const [batchNo, setBatchNo] = useState("");
   const [prdName, setPrdName] = useState("");
-  const [qrcode, setQRCode] = useState(null);
+  const [qrcode, setQRCode] = useState("https://google.com");
   const [expirationDate, setExpirationDate] = useState("");
 
   useEffect(() => {
     const initializeProductData = async () => {
       setProductID(generateUniqueID());
       setManufactureDate(getCurrentDate());
-      await generateQRCode();
+      // await generateQRCode();
     };
 
     initializeProductData();
@@ -40,71 +40,55 @@ export default function Manufacturer() {
     return `${year}-${month}-${day}`;
   };
 
-  const generateQRCode = async () => {
-    const url = await qrCode.toDataURL(`http://localhost:${productID}`);
-    setQRCode(url);
-  };
+  // const generateQRCode = async () => {
+  //   const url = await qrCode.toDataURL(`http://localhost:${productID}`);
+  //   setQRCode(url);
+  //   console.log(url);
+  // };
 
-  const convertQRCodeToPNG = (qrCodeUrl) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.src = qrCodeUrl;
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0, img.width, img.height);
-        canvas.toBlob(blob => {
-          resolve(new File([blob], 'qrcode.png', { type: 'image/png' }));
-        }, 'image/png');
-      };
-      img.onerror = reject;
-    });
-  };
+
 
   const addProduct = async (e) => {
     e.preventDefault();
-    if (qrCode) {
+    // if (qrCode) {
       try {
-        const qrCodeUrl = await qrCode.toDataURL(productID);
-        const qrCodePng = await convertQRCodeToPNG(qrCodeUrl);
-        const formData = new FormData();
-        formData.append('file', qrCodePng);
-
-        const resFile = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
-          method: "post",
-          body: formData,
+        const ans = await fetch("http://localhost:8000/post", {
+          method: "POST",
           headers: {
-            pinata_api_key: "2116f8d5d3eda0bd29e1",
-            pinata_secret_api_key: "1858c1b96394993389570925ad7bb82be08f04f21d0d31a8520cf9738200b8f7",
+            "Content-Type": "application/json",
           },
-        });
-
-        const data = await resFile.json();
-        const ImgHash = data.IpfsHash;
-        console.log(ImgHash);
-
-        const transaction = await contract.uploadProduct(prdName, prdName, batchNo, "ImgHash");
+          body: JSON.stringify({
+            productID, prdName, batchNo, qrcode, manufactureDate, expirationDate
+          })
+        })
+        if (ans.ok) {
+          // const data = await ans.json();
+          // console.log("Response:", data);
+          const transaction = await contract.uploadProduct(productID);
         await transaction.wait();
+          alert("Product Added Successfully");
+        } else {
+          console.error('Error:', ans.statusText);
+        }
 
-        alert("Product Added Successfully");
         setProductID(generateUniqueID());
         setBatchNo("");
         setPrdName("");
+        setExpirationDate("");
       } catch (error) {
         console.error("Error while adding product:", error);
         alert("Server Busy, Try Again Later");
       }
-    } else {
-      alert("QR Code not Generated yet");
-    }
+    // } 
+    // else {
+    //   alert("QR Code not Generated yet");
+    // }
   };
 
   return (
     <>
       <Navbar />
-      <div className='container mt-5'>
+      <div className="container col-lg-6 col-md-8 col-sm-10">
         <form onSubmit={addProduct}>
           <div className="mb-3">
             <label htmlFor="product_id" className="form-label">Product ID:</label>
@@ -121,14 +105,14 @@ export default function Manufacturer() {
             <input type="text" id="batch_no" name="batch_no" className="form-control" required value={batchNo} onChange={(e) => setBatchNo(e.target.value)} />
           </div>
 
-          {qrcode && (
+          {/* {qrcode && (
             <div className='mb-3'>
               <label htmlFor='qrcode' className="form-label">QR Code:</label>
               <div className='text-center'>
                 <img src={qrcode} alt="" className="img-fluid" />
               </div>
             </div>
-          )}
+          )} */}
 
           <div className="mb-3">
             <label htmlFor="manufacture_date" className="form-label">Manufacture Date:</label>

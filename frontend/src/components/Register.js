@@ -15,7 +15,7 @@ export default function Register() {
   const [username, setUsername] = useState('');
   const [address, setAddress] = useState('');
   const [password, setPassword] = useState('');
-  const [userRole, setUserRole] = useState(2);
+  const [userRole, setUserRole] = useState(4);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -88,7 +88,9 @@ export default function Register() {
                 required
               >
                 <option value="1">Manufacturer</option>
-                <option value="2">User</option>
+                <option value="2">Distributor</option>
+                <option value="3">Retailer</option>
+                <option value="4">User</option>
               </select>
             </div>
             <div className="form-group">

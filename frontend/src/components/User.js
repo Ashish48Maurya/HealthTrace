@@ -8,18 +8,17 @@ export default function User() {
   const { contract } = state;
   const scannerRef = useRef();
   const [res, setRes] = useState("");
-  const [Result, setResult] = useState({
-    prd_id: null,
-    prd_name: null,
-    batch_no: null,
-    expirationDate: null,
-    manufacturingDate: null
-  });
+  // const [Result, setResult] = useState({
+  //   prd_id: null,
+  //   prd_name: null,
+  //   batch_no: null,
+  //   expirationDate: null,
+  //   manufacturingDate: null
+  // });
 
   useEffect(async () => {
     const onScanSuccess = async (decodedText, decodedResult) => {
       setRes(decodedText);
-      await isFake();
     };
     const scannerId = 'qrScanner';
     scannerRef.current.id = scannerId;
@@ -34,14 +33,16 @@ export default function User() {
 
   const isFake = async () => {
     try {
-      const [real, productInfo] = await contract.isReal(res);
-      setResult({
-        prd_id: productInfo[0],
-        prd_name: productInfo[1],
-        batch_no: productInfo[2],
-        expirationDate: new Date(productInfo.expirationDate * 1000).toLocaleString(),
-        manufacturingDate: new Date(productInfo.manufacturingDate * 1000).toLocaleString()
-      });
+      console.log(res);
+      
+      const real = await contract.isReal(res);
+      // setResult({
+      //   prd_id: productInfo[0],
+      //   prd_name: productInfo[1],
+      //   batch_no: productInfo[2],
+      //   expirationDate: new Date(productInfo.expirationDate * 1000).toLocaleString(),
+      //   manufacturingDate: new Date(productInfo.manufacturingDate * 1000).toLocaleString()
+      // });
 
       if (real) {
         alert("Product is Real");
@@ -67,7 +68,7 @@ export default function User() {
         <div style={{ width: '400px', marginInline: "auto" }} ref={scannerRef}></div>
         <div className='mt-5'>
          
-         {res?<>
+         {/* {res?<>
           <ul class="list-group">
             <li class="list-group-item text-center"> {Result.prd_id}</li>
             <li class="list-group-item text-center">{Result.prd_name}</li>
@@ -75,7 +76,7 @@ export default function User() {
             <li class="list-group-item text-center">{Result.expirationDate}</li>
             <li class="list-group-item text-center">{Result.manufacturingDate}</li>
           </ul>
-         </> : ""}
+         </> : ""} */}
         </div>
       </div>
 
