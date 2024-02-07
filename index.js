@@ -26,6 +26,18 @@ app.post('/post', async (req, res) => {
     }
 })
 
+app.get('/get/:id',async(req,res)=>{
+    const {id} = req.params;
+    console.log(id);
+    try {
+        const ans = await Product.find({productID:id});
+        return res.status(200).json({ message: "true" , ans});
+    } catch (err) {
+        console.error(`Error sending message: ${err}`);
+        return res.status(500).json({ error: `Internal Server Error -> ${err}` });
+    }
+})
+
 mongoConnect(process.env.MONGO_URL).then(() => {
 
     app.listen(port, () => {

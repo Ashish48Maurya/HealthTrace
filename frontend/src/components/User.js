@@ -8,6 +8,7 @@ export default function User() {
   const { contract } = state;
   const scannerRef = useRef();
   const [res, setRes] = useState("");
+
   // const [Result, setResult] = useState({
   //   prd_id: null,
   //   prd_name: null,
@@ -31,11 +32,44 @@ export default function User() {
     };
   }, []);
 
+
+  let mongores;
+  async function fetchData(id) {
+    try {
+      const response = await fetch(`http://localhost:8000/get/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Data: ",data.ans[0].productID)
+        mongores = data.ans[0].productID;
+      } else {
+        console.log("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+
+
+
   const isFake = async () => {
     try {
-      console.log(res);
-      
-      const real = await contract.isReal(res);
+      await fetchData(res);
+      const prd = await contract.products(res);
+      // console.log("PRD:",prd);
+      // console.log("PRD2:",mongores);
+      if(prd===mongores){
+        alert("Real")
+      }
+      else{
+        alert("fake");
+      }
+      // const real = await contract.isReal(res);
+
       // setResult({
       //   prd_id: productInfo[0],
       //   prd_name: productInfo[1],
@@ -43,12 +77,6 @@ export default function User() {
       //   expirationDate: new Date(productInfo.expirationDate * 1000).toLocaleString(),
       //   manufacturingDate: new Date(productInfo.manufacturingDate * 1000).toLocaleString()
       // });
-
-      if (real) {
-        alert("Product is Real");
-      } else {
-        alert("Product is Fake");
-      }
     } catch (error) {
       console.error("Error during login:", error);
       alert("An error occurred during login. Please try again.");
@@ -67,8 +95,8 @@ export default function User() {
         <h4 className='text-center'>OR</h4>
         <div style={{ width: '400px', marginInline: "auto" }} ref={scannerRef}></div>
         <div className='mt-5'>
-         
-         {/* {res?<>
+
+          {/* {res?<>
           <ul class="list-group">
             <li class="list-group-item text-center"> {Result.prd_id}</li>
             <li class="list-group-item text-center">{Result.prd_name}</li>

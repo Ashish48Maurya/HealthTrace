@@ -25,8 +25,11 @@ export default function Login() {
             if(user == 1){
                 navigate('/manufacturer');
             }
-            else{
+            else if(user==4){
                 navigate('/user');
+            }
+            else{
+                navigate('/');
             }
           } else {
             alert("Login Failed: Incorrect password or Adderss");
