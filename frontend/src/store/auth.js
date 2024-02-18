@@ -5,7 +5,7 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
 
-
+    const [user,setUser] = useState('');
     const [state, setState] = useState({
         provider: null,
         signer: null,
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
     const [isloggedin, setIsloggedIn] = useState(false);
     const [address, setAddress] = useState(null);
     const connectWallet = async () => {
-        const contractAddress = "0x32B5a4127FF4f5FA61ce1559663b2A68E5327680";   //Ganache
+        const contractAddress = "0xa03D2ACF628343a25D338b231b9a54D326986376";   //Ganache
 
         const contractABI = abi.abi;
         try {
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
 
    
     return (
-        <AuthContext.Provider value={{ address, state, connectWallet, isloggedin,setIsloggedIn}}>
+        <AuthContext.Provider value={{ address, state, connectWallet,setUser, isloggedin,setIsloggedIn, user}}>
             {children}
         </AuthContext.Provider>
     );

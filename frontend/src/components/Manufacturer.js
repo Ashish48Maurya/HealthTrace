@@ -11,7 +11,7 @@ export default function Manufacturer() {
   const [productID, setProductID] = useState("");
   const [batchNo, setBatchNo] = useState("");
   const [prdName, setPrdName] = useState("");
-  const [qrcode, setQRCode] = useState("https://google.com");
+  const [qrcode, setQRCode] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
 
   useEffect(() => {
@@ -107,6 +107,7 @@ export default function Manufacturer() {
         setBatchNo("");
         setPrdName("");
         setExpirationDate("");
+        await generateQRCode();
       } catch (error) {
         console.error("Error while adding product:", error);
         alert("Server Busy, Try Again Later");

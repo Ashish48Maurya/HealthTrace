@@ -25,6 +25,18 @@ const productSchema = new mongoose.Schema({
     expirationDate: {
         required: true,
         type: Date,
+    },
+    distributor:{
+        type:String,
+        default:false, 
+    },
+    Retailer:{
+        type:String,
+        default:false, 
+    },
+    purchased:{
+        type: Number,
+        default:0,
     }
 });
 module.exports = mongoose.model('products', productSchema);

@@ -5,7 +5,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 
 export default function Login() {
     const navigate = useNavigate();
-    const { address, connectWallet,state,setIsloggedIn } = useAuth();
+    const { address, connectWallet,state,setIsloggedIn,setUser } = useAuth();
   const { contract } = state;
     useEffect(() => {
         connectWallet();
@@ -23,13 +23,19 @@ export default function Login() {
             console.log(isUser)
             const user = isUser[3];
             if(user == 1){
+                setUser("manu");
                 navigate('/manufacturer');
             }
             else if(user==4){
                 navigate('/user');
             }
+            else if(user==2){
+                setUser("dist");
+                navigate('/dProducts');
+            }
             else{
-                navigate('/');
+                setUser("retail");
+                navigate('/rProducts');
             }
           } else {
             alert("Login Failed: Incorrect password or Adderss");

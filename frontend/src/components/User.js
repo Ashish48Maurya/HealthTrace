@@ -8,14 +8,7 @@ export default function User() {
   const { contract } = state;
   const scannerRef = useRef();
   const [res, setRes] = useState("");
-
-  // const [Result, setResult] = useState({
-  //   prd_id: null,
-  //   prd_name: null,
-  //   batch_no: null,
-  //   expirationDate: null,
-  //   manufacturingDate: null
-  // });
+  const [head,setHead] = useState("");
 
   useEffect(async () => {
     const onScanSuccess = async (decodedText, decodedResult) => {
@@ -34,9 +27,10 @@ export default function User() {
 
 
   let mongores;
+  let num;
   async function fetchData(id) {
     try {
-      const response = await fetch(`http://localhost:8000/get/${id}`, {
+      const response = await fetch(`http://localhost:8000/fetch/${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -44,8 +38,14 @@ export default function User() {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log("Data: ",data.ans[0].productID)
-        mongores = data.ans[0].productID;
+        
+        mongores = data.ans.productID;
+        num = data.ans.purchased;
+        // setResult({
+        //   prd_name: data.ans.prdName,
+        //   expirationDate: new Date(data.ans.expirationDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        //   manufacturingDate: new Date(data.ans.manufactureDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+        // });        
       } else {
         console.log("Failed to fetch data");
       }
@@ -60,23 +60,17 @@ export default function User() {
     try {
       await fetchData(res);
       const prd = await contract.products(res);
-      // console.log("PRD:",prd);
-      // console.log("PRD2:",mongores);
-      if(prd===mongores){
-        alert("Real")
+      
+      if(prd===mongores && num==0){
+        setHead("Product is Real")
+        
       }
       else{
-        alert("fake");
+        setHead("Product is fake");
       }
       // const real = await contract.isReal(res);
 
-      // setResult({
-      //   prd_id: productInfo[0],
-      //   prd_name: productInfo[1],
-      //   batch_no: productInfo[2],
-      //   expirationDate: new Date(productInfo.expirationDate * 1000).toLocaleString(),
-      //   manufacturingDate: new Date(productInfo.manufacturingDate * 1000).toLocaleString()
-      // });
+     
     } catch (error) {
       console.error("Error during login:", error);
       alert("An error occurred during login. Please try again.");
@@ -94,18 +88,10 @@ export default function User() {
         </div>
         <h4 className='text-center'>OR</h4>
         <div style={{ width: '400px', marginInline: "auto" }} ref={scannerRef}></div>
-        <div className='mt-5'>
-
-          {/* {res?<>
-          <ul class="list-group">
-            <li class="list-group-item text-center"> {Result.prd_id}</li>
-            <li class="list-group-item text-center">{Result.prd_name}</li>
-            <li class="list-group-item text-center">{Result.batch_no}</li>
-            <li class="list-group-item text-center">{Result.expirationDate}</li>
-            <li class="list-group-item text-center">{Result.manufacturingDate}</li>
-          </ul>
-         </> : ""} */}
-        </div>
+        <h3 className='mt-5 text-center'>
+        {head}
+          
+        </h3>
       </div>
 
       <style>
