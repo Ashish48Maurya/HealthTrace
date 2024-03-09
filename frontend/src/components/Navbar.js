@@ -5,9 +5,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../store/auth';
 export default function Navbar() {
     const navigate = useNavigate();
-    const { address,isloggedin, user } = useAuth();
-
-
+    const { address, isloggedin, user } = useAuth();
     return (
         <>
             <nav className="navbar navbar-expand-lg" style={{ maxHeight: "50px" }}>
@@ -19,17 +17,18 @@ export default function Navbar() {
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul className="navbar-nav me-auto mb-lg-0 fs-5 fw-normal">
 
-                            {user=="manu" && <li className="nav-item" style={{ "margin-inline": "10px" }}>
+                            {user == "manu" && <><li className="nav-item" style={{ "margin-inline": "10px" }}>
                                 <Link className="nav-link active" aria-current="page" to='/mProducts'>Products</Link>
-                            </li>}
 
-                            {/* {user=="dist" && <li className="nav-item" style={{ "margin-inline": "10px" }}>
-                                <Link className="nav-link active" aria-current="page" to='/'>Home</Link>
-                            </li>}
-                            {user=="retail" && <li className="nav-item" style={{ "margin-inline": "10px" }}>
+                            </li><li className="nav-item" style={{ "margin-inline": "10px" }}>
+                                    <Link className="nav-link active" aria-current="page" to='/manufacturer'>Home</Link>
+
+                                </li></>}
+
+                            {/*{user=="retail" && <li className="nav-item" style={{ "margin-inline": "10px" }}>
                                 <Link className="nav-link active" aria-current="page" to='/'>Home</Link>
                             </li>} */}
-                            
+
                         </ul>
                         <form className="d-flex fs-6 fw-medium ms-auto" >
                             {isloggedin ? <>

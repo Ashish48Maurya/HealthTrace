@@ -5,72 +5,90 @@ import { Navigate, useNavigate } from 'react-router-dom';
 
 export default function Login() {
     const navigate = useNavigate();
-    const { address, connectWallet,state,setIsloggedIn,setUser } = useAuth();
-  const { contract } = state;
+    const { address, connectWallet, state, setIsloggedIn, setUser } = useAuth();
+    const { contract } = state;
+    const [password,setPassword] = useState('');
     useEffect(() => {
         connectWallet();
     }, [])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        try {
-          const result = await contract.login(pass);
-          if (result) {
-            const isUser = await contract.users(address);
-            alert("Login Successful");
-            setIsloggedIn(true);
-            console.log(isUser)
-            const user = isUser[3];
-            if(user == 1){
-                setUser("manu");
-                navigate('/manufacturer');
-            }
-            else if(user==4){
-                navigate('/user');
-            }
-            else if(user==2){
-                setUser("dist");
-                navigate('/dProducts');
-            }
-            else{
-                setUser("retail");
-                navigate('/rProducts');
-            }
-          } else {
-            alert("Login Failed: Incorrect password or Adderss");
-          }
-        } catch (error) {
-          console.error("Error during login:", error);
-          alert("An error occurred during login. Please try again.");
-        }
-      };
-      
 
-    const [pass,setPass] = useState('');
+        try {
+            const result = await contract.login(password);
+            console.log("RESULT:",result);
+            if (result) {
+
+                const response = await fetch('http://localhost:4000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        address,
+                        password,
+                    }),
+                });
+
+                if (response.ok) {
+                    const responseData = await response.json();
+                    alert("Login Successful");
+                    setIsloggedIn(true);
+
+                    const userRole = responseData.user.userRole;
+
+                    if (userRole === 1) {
+                        setUser("manu");
+                        navigate('/manufacturer');
+                    } else if (userRole === 4) {
+                        navigate('/user');
+                    } else if (userRole === 2) {
+                        setUser("dist");
+                        navigate('/dProducts');
+                    } else {
+                        setUser("retail");
+                        navigate('/rProducts');
+                    }
+                } else {
+                    console.error("Login failed on the backend");
+                    alert("Login Failed: Incorrect password or Address");
+                }
+            } else {
+                alert("Login Failed: Incorrect password or Address");
+            }
+        } catch (error) {
+            console.error("Error during login:", error);
+            alert("An error occurred during login. Please try again.");
+        }
+    };
+
+
+
+    const [pass, setPass] = useState('');
     return (
         <>
             <Navbar />
             <div class="container ">
 
-            <div class="form-body">
-        <form id="registerForm" onSubmit={handleSubmit}>
-            <div class="form-group">
-                <label for="address">Address:</label>
-                <input type="text" id="address" name="address" required value={address}/>
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password"  value={pass}
-                onChange={(e) => setPass(e.target.value)} required/>
-            </div>
-            <div class="form-group">
-                <button type="submit">Login</button>
-            </div>
-        </form>
-    </div>
+                <div class="form-body">
+                    <form id="registerForm" onSubmit={handleSubmit}>
+                        <div class="form-group">
+                            <label for="address">Address:</label>
+                            <input type="text" id="address" name="address" required value={address} />
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password:</label>
+                            <input type="password" id="password" name="password" value={password}
+                                onChange={(e) => setPassword(e.target.value)} required />
+                        </div>
+                        <div class="form-group">
+                            <button type="submit">Login</button>
+                        </div>
+                    </form>
+                </div>
             </div >
-        <style>{`
+            <style>{`
 
 
 .container {

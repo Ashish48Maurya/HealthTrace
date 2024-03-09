@@ -23,8 +23,28 @@ export default function Register() {
     try {
       const transaction = await contract.addUser(address, username, password, userRole);
       await transaction.wait();
-      alert("Registration Successfull");
-      navigate('/login');
+
+      const response = await fetch('http://localhost:4000/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username,
+          userRole,
+          address,
+          password,
+        }),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        alert("Registration Successful");
+        navigate('/login');
+      } else {
+        console.error("Error registering user on the backend");
+        alert("An error occurred while registering the user on the backend. Please try again.");
+      }
 
     } catch (error) {
       if (error.code === 4001) {

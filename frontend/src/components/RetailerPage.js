@@ -6,18 +6,33 @@ import { useAuth } from '../store/auth';
 export default function User() {
     const { state } = useAuth();
     const { contract } = state;
+    const [items, setItems] = useState([]);
     const scannerRef = useRef();
     const [res, setRes] = useState("");
 
     const [Result, setResult] = useState({
-      prd_id: null,
-      prd_name: null,
-      batch_no: null,
-      expirationDate: null,
-      manufacturingDate: null
+        prd_id: null,
+        prd_name: null,
+        batch_no: null,
+        expirationDate: null,
+        manufacturingDate: null
     });
 
+
+
+    const getData = async () => {
+        try {
+            const response = await fetch('http://localhost:4000/retailer_get_distributor');
+            const data = await response.json();
+            setItems(data.ans);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+
     useEffect(async () => {
+        getData();
         const onScanSuccess = async (decodedText, decodedResult) => {
             setRes(decodedText);
         };
@@ -35,17 +50,17 @@ export default function User() {
 
     async function markProductAsSold(id) {
         try {
-            const response = await fetch(`http://localhost:8000/solded/${id}`, {
+            const response = await fetch(`http://localhost:4000/solded/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
-                }
+                },
             });
-    
+
             if (response.ok) {
                 const result = await response.json();
-                // console.log(result.message); 
-                alert("Product Marked As Sold");   
+                setItems(prevItems => prevItems.filter(item => item._id !== id));
+                alert("Product Marked As Sold");
             } else {
                 console.log("Failed to mark product as sold");
             }
@@ -55,10 +70,11 @@ export default function User() {
     }
 
 
+
     let mongores;
     async function fetchData(id) {
         try {
-            const response = await fetch(`http://localhost:8000/fetch/${id}`, {
+            const response = await fetch(`http://localhost:4000/fetch/${id}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -78,30 +94,6 @@ export default function User() {
 
 
     const isFake = async () => {
-        // try {
-        //     await fetchData(res);
-        //     const prd = await contract.products(res);
-
-        //     if (prd === mongores) {
-
-                
-        //           setResult({
-        //             prd_id: productInfo[0],
-        //             prd_name: productInfo[1],
-        //             batch_no: productInfo[2],
-        //             expirationDate: new Date(productInfo.expirationDate * 1000).toLocaleString(),
-        //             manufacturingDate: new Date(productInfo.manufacturingDate * 1000).toLocaleString()
-        //           });
-        //     }
-        //     else {
-        //         alert("Invalid Product ID");
-        //     }
-
-
-        // } catch (error) {
-        //     console.error("Error during login:", error);
-        //     alert("An error occurred during login. Please try again.");
-        // }
         await fetchData(res);
     };
 
@@ -109,35 +101,48 @@ export default function User() {
     return (
         <>
             <Navbar />
-            <div className="container">
+            <div className="container mt-5">
                 <div className="input-group mb-4">
                     <input type="text" className="form-control" placeholder="Enter Product ID" aria-label="Recipient's username" aria-describedby="basic-addon2" value={res} onChange={(e) => setRes(e.target.value)} />
                     <span className="input-group-text btn btn-outline-primary ms-2 fw-semibold" id="basic-addon2" onClick={isFake}>Solded</span>
                 </div>
                 <h4 className='text-center'>OR</h4>
                 <div style={{ width: '400px', marginInline: "auto" }} ref={scannerRef}></div>
-                <div className='mt-5'>
-
-                    {/* {res?<>
-          <ul class="list-group">
-            <li class="list-group-item text-center"> {Result.prd_id}</li>
-            <li class="list-group-item text-center">{Result.prd_name}</li>
-            <li class="list-group-item text-center">{Result.batch_no}</li>
-            <li class="list-group-item text-center">{Result.expirationDate}</li>
-            <li class="list-group-item text-center">{Result.manufacturingDate}</li>
-          </ul>
-         </> : ""} */}
-                </div>
             </div>
 
-            <style>
-                {`
-          .container {
-            height: 300px; 
-            width: 600px; 
-          }
-        `}
-            </style>
+            <h3 className='text-center m-4'>Product List</h3>
+
+            {items.length === 0 ? (
+                <h2 className="text-center">No products available</h2>
+            ) : (
+                <table class="table table-dark table-striped container">
+                    <thead>
+                        <tr className='text-center'>
+                            <th scope="col">Product ID</th>
+                            <th scope="col">Product Name</th>
+                            <th scope="col">Batch No</th>
+                            <th scope="col">Manufacture Date</th>
+                            <th scope="col">Expiration Date</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        {items.map(item => (
+                            <tr key={item._id} style={{ marginBottom: '20px', border: '1px solid #ccc', padding: '10px', borderRadius: '5px' }} className='text-center'>
+                                <td>{item.productID}</td>
+                                <td>{item.prdName}</td>
+                                <td>{item.batchNo}</td>
+                                <td>{new Date(item.manufactureDate).toLocaleDateString()}</td>
+                                <td>{new Date(item.expirationDate).toLocaleDateString()}</td>
+
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+
+            )}
+
         </>
     );
 }

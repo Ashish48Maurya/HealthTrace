@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-
+import Navbar from '../components/Navbar'
 const ManuProducts = () => {
     const [items, setItems] = useState([]);
 
     const fetchData = async () => {
         try {
-            const response = await fetch('http://localhost:8000/dgetSold');
+            const response = await fetch('http://localhost:4000/dgetSold');
             const data = await response.json();
             setItems(data.ans);
         } catch (error) {
@@ -18,7 +18,7 @@ const ManuProducts = () => {
 
     const handleSoldClick = async (productId) => {
         try {
-            const response = await fetch(`http://localhost:8000/dgetSold/${productId}`, {
+            const response = await fetch(`http://localhost:4000/dgetSold/${productId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -39,19 +39,53 @@ const ManuProducts = () => {
 
     return (
         <div>
-            <h1>Product List</h1>
-            <ul style={{ listStyleType: 'none', padding: 0 }}>
-                {items.map(item => (
-                    <li key={item._id} style={{ marginBottom: '20px', border: '1px solid #ccc', padding: '10px', borderRadius: '5px' }}>
-                        <strong>Product ID:</strong> {item.productID}<br />
-                        <strong>Product Name:</strong> {item.prdName}<br />
-                        <strong>Batch No:</strong> {item.batchNo}<br />
-                        <strong>Manufacture Date:</strong> {new Date(item.manufactureDate).toLocaleDateString()}<br />
-                        <strong>Expiration Date:</strong> {new Date(item.expirationDate).toLocaleDateString()}<br />
-                        <button className='btn btn-primary' onClick={() => handleSoldClick(item.productID)}>Sold</button>
-                    </li>
-                ))}
-            </ul>
+            <Navbar />
+            <h4 className='text-center m-3'>Products List</h4>
+
+            {items.length === 0 ? (
+                <h3 className='text-center m-3'>No items available</h3>
+            ) : (
+                <table className="table table-dark table-striped container">
+                    <thead>
+                        <tr className='text-center'>
+                            <th scope="col">Product ID</th>
+                            <th scope="col">Product Name</th>
+                            <th scope="col">Batch No</th>
+                            <th scope="col">Manufacture Date</th>
+                            <th scope="col">Expiration Date</th>
+                            <th scope="col">Sell Product</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {items.map((item) => (
+                            <tr
+                                key={item._id}
+                                style={{
+                                    marginBottom: '20px',
+                                    border: '1px solid #ccc',
+                                    padding: '10px',
+                                    borderRadius: '5px',
+                                }}
+                                className='text-center'
+                            >
+                                <td>{item.productID}</td>
+                                <td>{item.prdName}</td>
+                                <td>{item.batchNo}</td>
+                                <td>{new Date(item.manufactureDate).toLocaleDateString()}</td>
+                                <td>{new Date(item.expirationDate).toLocaleDateString()}</td>
+                                <td>
+                                    <button
+                                        className='btn btn-primary'
+                                        onClick={() => handleSoldClick(item.productID)}
+                                    >
+                                        Sold
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
         </div>
     );
 };

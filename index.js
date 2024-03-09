@@ -4,7 +4,9 @@ const app = express();
 const mongoConnect = require('./db');
 const cors = require('cors');
 const Product = require('./models/Products');
-const port = 8000;
+const User = require('./models/User');
+const bcrypt = require('bcryptjs')
+const port = 4000;
 
 app.use(cors());
 app.use(express.json());
@@ -15,6 +17,12 @@ app.post('/post', async (req, res) => {
     return res.status(422).json({ error: 'All Fields Are Required!' });
   }
   try {
+    const existingPrd = await Product.findOne({ batchNo: batchNo });
+
+    if (existingPrd) {
+      return res.status(422).json({ error: "batchNo already exists!" });
+    }
+
     const product = new Product({
       productID, prdName, batchNo, qrcode, manufactureDate, expirationDate
     });
@@ -25,6 +33,65 @@ app.post('/post', async (req, res) => {
     return res.status(500).json({ error: `Internal Server Error -> ${err}` });
   }
 })
+
+
+app.post('/register', async (req, res) => {
+  const { username, userRole, address, password } = req.body;
+  if (!username || !userRole || !address) {
+    return res.status(422).json({ error: 'All Fields Are Required!' });
+  }
+  try {
+    const existingUser = await User.findOne({ address: address });
+
+    if (existingUser) {
+      return res.status(422).json({ error: "User already exists!" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const USER = new User({
+      username, userRole, address, password: hashedPassword
+    });
+    const user = await USER.save();
+    return res.status(200).json({ message: 'User Registered successfully!', user });
+  } catch (err) {
+    console.error(`Error sending message: ${err}`);
+    return res.status(500).json({ error: `Internal Server Error -> ${err}` });
+  }
+})
+
+
+
+app.post('/login', async (req, res) => {
+  const { address, password } = req.body;
+
+  if (!address || !password) {
+      return res.status(422).json({ error: "Please provide a valid email and password" });
+  }
+
+  try {
+      
+      const user = await User.findOne({ address:address });
+      if (!user) {
+          return res.status(422).json({ error: "Invalid address or password" });
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      if (isMatch) {
+          return res.status(200).json({
+              user: user,
+              message: "Login successful",
+          });
+      } else {
+          return res.status(404).json({ error: "Invalid Credentials!!!" });
+      }
+  } catch (err) {
+      console.log(err);
+      return res.status(500).json({ error: "Internal server error" });
+  }
+})
+
+
 
 app.get('/fetch/:id', async (req, res) => {
   const { id } = req.params;
@@ -108,6 +175,18 @@ app.get('/dgetSold', async (req, res) => {
   }
 });
 
+
+app.get('/retailer_get_distributor', async (req, res) => {
+  try {
+    const ans = await Product.find({ purchased:0 });
+    return res.status(200).json({ ans });
+  } catch (err) {
+    console.error(`Error sending message: ${err}`);
+    return res.status(500).json({ error: `Internal Server Error -> ${err}` });
+  }
+});
+
+
 app.put('/dgetSold/:productId', async (req, res) => {
   const { productId } = req.params;
   try {
@@ -127,6 +206,7 @@ app.put('/dgetSold/:productId', async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 mongoConnect(process.env.MONGO_URL).then(() => {
 

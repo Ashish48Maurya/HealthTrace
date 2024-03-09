@@ -86,28 +86,34 @@ export default function Manufacturer() {
         const ImgHash = data.IpfsHash;
         console.log(ImgHash);
         setQRCode(ImgHash);
-        const ans = await fetch("http://localhost:8000/post", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            productID, prdName, batchNo, qrcode:ImgHash, manufactureDate, expirationDate
+        const transaction = await contract.uploadProduct(productID);
+        await transaction.wait();
+        if (transaction) {
+          const ans = await fetch("http://localhost:4000/post", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              productID, prdName, batchNo, qrcode: ImgHash, manufactureDate, expirationDate
+            })
           })
-        })
-        if (ans.ok) {
-          const transaction = await contract.uploadProduct(productID);
-          await transaction.wait();
-          alert("Product Added Successfully");
-        } else {
-          console.error('Error:', ans.statusText);
+          if (ans.ok) {
+            alert("Product Added Successfully");
+            setProductID(generateUniqueID());
+            setBatchNo("");
+            setPrdName("");
+            setExpirationDate("");
+            await generateQRCode();
+          } else {
+            alert("BatchNo. Already Exist");
+          }
+        }
+        else {
+          alert("Error Adding Product");
         }
 
-        setProductID(generateUniqueID());
-        setBatchNo("");
-        setPrdName("");
-        setExpirationDate("");
-        await generateQRCode();
+
       } catch (error) {
         console.error("Error while adding product:", error);
         alert("Server Busy, Try Again Later");
